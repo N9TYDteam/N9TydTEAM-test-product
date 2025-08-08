@@ -1,0 +1,1 @@
+!! IFF YOU USING EXECUTOR MOBILE LIKE ARCEUS X OR DELTA USE THIS SHORTCUTTER "loadstring(game:HttpGet('https://raw.githubusercontent.com/N9TYDteam/N9TydTEAM-test-product/refs/heads/main/Nhub'))()" also u can use it on pc version if you just want to shortcut script
