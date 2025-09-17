@@ -1,5 +1,3 @@
--- От: N9TydTEAM
-
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -7,32 +5,53 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local function showAchievement(text)
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Nhub console",
+            Text = tostring(text),
+            Duration = 4,
+            Icon = "rbxassetid://88854609427595"
+        })
+    end)
+end
 
-local accessGui = Instance.new("ScreenGui", playerGui)
+local oldPrint = print
+function print(...)
+    local msg = table.concat({...}, " ")
+    oldPrint(msg)
+    showAchievement(msg)
+end
+
+local accessGui = Instance.new("ScreenGui")
 accessGui.Name = "AccessKeyGUI"
 accessGui.ResetOnSpawn = false
+accessGui.Parent = playerGui
 
-local bg = Instance.new("Frame", accessGui)
+local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.new(0, 0, 0)
 bg.BackgroundTransparency = 0.4
+bg.Parent = accessGui
 
-local keyFrame = Instance.new("Frame", accessGui)
-keyFrame.Size = UDim2.new(0, 300, 0, 170)
-keyFrame.Position = UDim2.new(0.5, -150, 0.5, -85)
+local keyFrame = Instance.new("Frame")
+keyFrame.Size = UDim2.new(0, 300, 0, 190)
+keyFrame.Position = UDim2.new(0.5, -150, 0.5, -95)
 keyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 keyFrame.BorderSizePixel = 0
+keyFrame.Parent = accessGui
 
-local title = Instance.new("TextLabel", keyFrame)
+local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0.3, 0)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Введите ключ(маленькие буквы замените на главные при возможности)"
+title.Text = "Введите ключ (маленькие буквы замените на главные при возможности)"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.TextScaled = true
 title.Font = Enum.Font.Arcade
+title.Parent = keyFrame
 
-local textbox = Instance.new("TextBox", keyFrame)
+local textbox = Instance.new("TextBox")
 textbox.Size = UDim2.new(0.85, 0, 0.25, 0)
 textbox.Position = UDim2.new(0.075, 0, 0.4, 0)
 textbox.Font = Enum.Font.Arcade
@@ -42,215 +61,468 @@ textbox.PlaceholderText = "faqnteam.tilda.ws сайт с ключем"
 textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 textbox.BorderSizePixel = 0
+textbox.Parent = keyFrame
 
-local button = Instance.new("TextButton", keyFrame)
+local button = Instance.new("TextButton")
 button.Size = UDim2.new(0.6, 0, 0.2, 0)
 button.Position = UDim2.new(0.2, 0, 0.75, 0)
-button.Text = "ПОДТВЕРДИТЬ"
+button.Text = "confirm (enter)"
 button.Font = Enum.Font.Arcade
 button.TextScaled = true
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 button.BorderSizePixel = 0
+button.Active = true
+button.Parent = keyFrame
 
-local correctKey = "2FFA567VCA"
+local errorLabel = Instance.new("TextLabel")
+errorLabel.Size = UDim2.new(1, 0, 0.15, 0)
+errorLabel.Position = UDim2.new(0, 0, 0.85, 0)
+errorLabel.BackgroundTransparency = 1
+errorLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+errorLabel.TextScaled = true
+errorLabel.Font = Enum.Font.Arcade
+errorLabel.Visible = false
+errorLabel.Parent = keyFrame
+
+local keyUrl = "https://pastebin.com/raw/jrYz5kDk"
+local correctKey = game:HttpGet(keyUrl)
 
 
 local function launchMainGui()
-	accessGui:Destroy()
+    accessGui:Destroy()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "nhub"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = playerGui
 
-	local screenGui = Instance.new("ScreenGui", playerGui)
-	screenGui.Name = "UltrakillFlyGui"
-	screenGui.ResetOnSpawn = false
-	screenGui.IgnoreGuiInset = true
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    local image = Instance.new("ImageLabel")
+    image.Size = UDim2.new(0.35, 0, 0.4, 0)
+    image.Position = UDim2.new(0.2, 0, 0.05, 0)
+    image.BackgroundTransparency = 1
+    image.Image = "rbxassetid://102227751709662"
+    image.ScaleType = Enum.ScaleType.Fit
+    image.Active = true
+    image.Parent = screenGui
 
-	
-	local image = Instance.new("ImageLabel", screenGui)
-	image.Size = UDim2.new(0.6, 0, 0.8, 0)
-	image.Position = UDim2.new(0.2, 0, 0.05, 0)
-	image.BackgroundTransparency = 1
-	image.Image = "rbxassetid://90522214467429"
-	image.ScaleType = Enum.ScaleType.Fit
 
-	local dragging = false
-	local dragOffset = Vector2.new(0, 0)
+    local tooltip = Instance.new("TextLabel")
+    tooltip.Size = UDim2.new(0, 190, 0, 44)
+    tooltip.BackgroundColor3 = Color3.fromRGB(0, 180, 180)
+    tooltip.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tooltip.TextScaled = true
+    tooltip.Font = Enum.Font.SciFi
+    tooltip.Text = ""
+    tooltip.Visible = false
+    tooltip.ZIndex = 999
+    tooltip.Parent = screenGui
 
-	image.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			local mouseLocation = UIS:GetMouseLocation()
-			local imagePosition = image.AbsolutePosition
-			dragOffset = mouseLocation - imagePosition
-		end
-	end)
+    local function showTooltip(text)
+        tooltip.Text = text
+        tooltip.Visible = true
+    end
+    local function hideTooltip()
+        tooltip.Visible = false
+    end
+    local function moveTooltip(x, y)
+        tooltip.Position = UDim2.new(0, x + 12, 0, y + 12)
+    end
 
-	UIS.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
-	end)
 
-	RunService.RenderStepped:Connect(function()
-		if dragging and image.Visible then
-			local mouseLocation = UIS:GetMouseLocation()
-			local newPos = mouseLocation - dragOffset
-			local screenSize = workspace.CurrentCamera.ViewportSize
-			local x = math.clamp(newPos.X, 0, screenSize.X - image.AbsoluteSize.X)
-			local y = math.clamp(newPos.Y, 0, screenSize.Y - image.AbsoluteSize.Y)
-			image.Position = UDim2.new(0, x, 0, y)
-		end
-	end)
+    local qhButton = Instance.new("ImageLabel")
+    qhButton.Size = UDim2.new(0, 119, 0, 26)
+    qhButton.Position = UDim2.new(0, 129, 0.151, -95)
+    qhButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    qhButton.Image = "rbxassetid://72079177751993"
+    qhButton.Visible = true
+    qhButton.Parent = image 
 
-	
-	local label = Instance.new("TextLabel", screenGui)
-	label.Size = UDim2.new(1, 0, 0.15, 0)
-	label.Position = UDim2.new(0, 0, 0.85, 0)
-	label.BackgroundTransparency = 1
-	label.Text = "BY N9TydTEAM"
-	label.TextColor3 = Color3.fromRGB(255, 0, 0)
-	label.TextScaled = true
-	label.Font = Enum.Font.Arcade
-	label.TextStrokeTransparency = 0.6
-	label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+ 
+    local flyButton = Instance.new("TextButton")
+    flyButton.Size = UDim2.new(0, 110, 0, 40)
+    flyButton.Position = UDim2.new(0, 144, 0, 0)
+    flyButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    flyButton.Text = "fly by n9team"
+    flyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+    flyButton.Font = Enum.Font.Arcade
+    flyButton.TextScaled = true
+    flyButton.TextStrokeTransparency = 0.5
+    flyButton.BorderSizePixel = 0
+    flyButton.Active = true
+    flyButton.Visible = true
+    flyButton.Parent = image
 
-	task.spawn(function()
-		while true do
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			wait(0.3)
-			label.TextColor3 = Color3.fromRGB(100, 0, 0)
-			wait(0.3)
-		end
-	end)
+    local infButton = Instance.new("TextButton")
+    infButton.Size = UDim2.new(0, 110, 0, 40)
+    infButton.Position = UDim2.new(0, 270, 0, 0)
+    infButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    infButton.Text = "★ Inf Yield ★"
+    infButton.Font = Enum.Font.SciFi
+    infButton.TextColor3 = Color3.fromRGB(0, 255, 128)
+    infButton.TextStrokeTransparency = 0.1
+    infButton.BorderSizePixel = 0
+    infButton.Active = true
+    infButton.Visible = true
+    infButton.TextScaled = true
+    infButton.Parent = image
 
-	
-	local flyButton = Instance.new("TextButton", image)
-	flyButton.Size = UDim2.new(0, 240, 0, 90)
-	flyButton.Position = UDim2.new(0, 146, 0, 0)
-	flyButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	flyButton.Text = "fly by n9team"
-	flyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-	flyButton.Font = Enum.Font.Arcade
-	flyButton.TextScaled = true
-	flyButton.TextStrokeTransparency = 0.5
-	flyButton.BorderSizePixel = 0
+    local zButton = Instance.new("TextButton")
+    zButton.Size = UDim2.new(0, 119, 0, 26)
+    zButton.Position = UDim2.new(0, 129, 0.151, -95)
+    zButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    zButton.Text = ""
+    zButton.Font = Enum.Font.SciFi
+    zButton.BackgroundTransparency = 1
+    zButton.TextColor3 = Color3.fromRGB(0, 255, 128)
+    zButton.TextStrokeTransparency = 0.1
+    zButton.BorderSizePixel = 0
+    zButton.Active = true
+    zButton.Visible = true
+    zButton.TextScaled = true
+    zButton.Parent = image
 
-	
-	local infButton = Instance.new("TextButton", image)
-	infButton.Size = UDim2.new(0, 240, 0, 90)
-	infButton.Position = UDim2.new(0, 438, 0, 0)
-	infButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	infButton.Text = "inf yield"
-	infButton.TextColor3 = Color3.fromRGB(255, 0, 255)
-	infButton.Font = Enum.Font.Arcade
-	infButton.TextScaled = true
-	infButton.TextStrokeTransparency = 0.5
-	infButton.BorderSizePixel = 0
+    local hideButton = Instance.new("TextButton")
+    hideButton.Size = UDim2.new(0, 40, 0, 20)
+    hideButton.Position = UDim2.new(1, -170, 0, 4)
+    hideButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    hideButton.Text = "✖"
+    hideButton.TextColor3 = Color3.new(1, 1, 1)
+    hideButton.Font = Enum.Font.Arcade
+    hideButton.TextScaled = true
+    hideButton.Active = true
+    hideButton.Visible = true
+    hideButton.Parent = image
 
-	
-	local hideButton = Instance.new("TextButton", image)
-	hideButton.Size = UDim2.new(0, 100, 0, 40)
-	hideButton.Position = UDim2.new(1, -250, 0, 5)
-	hideButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-	hideButton.Text = "✖"
-	hideButton.TextColor3 = Color3.new(1, 1, 1)
-	hideButton.Font = Enum.Font.Arcade
-	hideButton.TextScaled = true
+    local showButton = Instance.new("TextButton")
+    showButton.Size = UDim2.new(0, 120, 0, 40)
+    showButton.Position = UDim2.new(0, 10, 1, -50)
+    showButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    showButton.Text = "Show"
+    showButton.TextColor3 = Color3.new(1, 1, 1)
+    showButton.Font = Enum.Font.Arcade
+    showButton.TextScaled = true
+    showButton.Active = true
+    showButton.Visible = false
+    showButton.Parent = screenGui
 
-	
-	local showButton = Instance.new("TextButton", screenGui)
-	showButton.Size = UDim2.new(0, 120, 0, 40)
-	showButton.Position = UDim2.new(0, 10, 1, -50)
-	showButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-	showButton.Text = "Show"
-	showButton.TextColor3 = Color3.new(1, 1, 1)
-	showButton.Font = Enum.Font.Arcade
-	showButton.TextScaled = true
-	showButton.Visible = false
+    local searchButton = Instance.new("TextButton")
+    searchButton.Size = UDim2.new(0, 120, 0, 40)
+    searchButton.Position = UDim2.new(0, 128.4, 1, -40)
+    searchButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+    searchButton.Text = "search"
+    searchButton.TextColor3 = Color3.new(1, 1, 1)
+    searchButton.Font = Enum.Font.Arcade
+    searchButton.TextScaled = true
+    searchButton.Active = true
+    searchButton.Visible = true
+    searchButton.Parent = image
 
-	hideButton.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			image.Visible = false
-			showButton.Visible = true
-		end
-	end)
 
-	showButton.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			image.Visible = true
-			showButton.Visible = false
-		end
-	end)
+    local dragging = false
+    local dragOffset = Vector2.new(0, 0)
 
-	-- Fly функционал
-	local flying = false
-	local flySpeed = 50
-	local flyBodyVel
-	local flyConn
+    image.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            local mouseLocation = UIS:GetMouseLocation()
+            local imagePosition = image.AbsolutePosition
+            dragOffset = mouseLocation - imagePosition
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    RunService.RenderStepped:Connect(function()
+        if dragging and image.Visible then
+            local mouseLocation = UIS:GetMouseLocation()
+            local newPos = mouseLocation - dragOffset
+            image.Position = UDim2.new(0, newPos.X, 0, newPos.Y)
+        end
+    end)
 
-	local function startFly()
-		if flying then return end
-		flying = true
+ 
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Insert then
+            if image and not image.Visible then
+                image.Visible = true
+                showButton.Visible = false
+            end
+        end
+    end)
 
-		local root = player.Character:WaitForChild("HumanoidRootPart")
-		flyBodyVel = Instance.new("BodyVelocity")
-		flyBodyVel.Velocity = Vector3.zero
-		flyBodyVel.MaxForce = Vector3.new(1,1,1) * 1e5
-		flyBodyVel.Parent = root
 
-		flyConn = RunService.RenderStepped:Connect(function()
-			if flying then
-				local cam = workspace.CurrentCamera
-				local dir = Vector3.zero
+    flyButton.MouseEnter:Connect(function() showTooltip("self maded fly for example") end)
+    flyButton.MouseLeave:Connect(hideTooltip)
+    flyButton.MouseMoved:Connect(moveTooltip)
 
-				if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
-				if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
-				if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
-				if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
-				if UIS:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end
-				if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end
+    infButton.MouseEnter:Connect(function() showTooltip("infinity yield is a base of all scripts") end)
+    infButton.MouseLeave:Connect(hideTooltip)
+    infButton.MouseMoved:Connect(moveTooltip)
 
-				if dir.Magnitude > 0 then
-					flyBodyVel.Velocity = dir.Unit * flySpeed
-				else
-					flyBodyVel.Velocity = Vector3.zero
-				end
-			end
-		end)
-	end
+    hideButton.MouseEnter:Connect(function() showTooltip("insert to show on PC") end)
+    hideButton.MouseLeave:Connect(hideTooltip)
+    hideButton.MouseMoved:Connect(moveTooltip)
 
-	local function stopFly()
-		flying = false
-		if flyBodyVel then flyBodyVel:Destroy() flyBodyVel = nil end
-		if flyConn then flyConn:Disconnect() end
-	end
+    
+    searchButton.MouseEnter:Connect(function() showTooltip("Nhub will analyze on what place you are playing and gives the scripts for it.") end)
+    searchButton.MouseLeave:Connect(hideTooltip)
+    searchButton.MouseMoved:Connect(moveTooltip)
 
-	flyButton.MouseButton1Click:Connect(function()
-		if not flying then
-			startFly()
-			flyButton.Text = "Fly: ON"
-		else
-			stopFly()
-			flyButton.Text = "Fly: OFF"
-		end
-	end)
+    zButton.MouseEnter:Connect(function() showTooltip("version 2.3 by bulkabarabulka ") end)
+    zButton.MouseLeave:Connect(hideTooltip)
+    zButton.MouseMoved:Connect(moveTooltip)
 
-	infButton.MouseButton1Click:Connect(function()
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-		infButton.Text = "Загружено"
-	end)
+
+    hideButton.MouseButton1Click:Connect(function()
+        image.Visible = false
+        showButton.Visible = true
+    end)
+    showButton.MouseButton1Click:Connect(function()
+        image.Visible = true
+        showButton.Visible = false
+    end)
+
+
+    local oButton, aButton, eButton
+    local function runPlaceCommands(placeId)
+        if placeId == 1792438584796 then
+            print("you cool")
+        elseif placeId == 91792438584796 then
+            print("hmm might you playng our game?")
+            task.wait(0.7)
+            print("finding scripts for it...")
+            task.wait(2.5)
+            print("done!")
+
+            oButton = Instance.new("TextButton")
+            oButton.Size = UDim2.new(0, 110, 0, 40)
+            oButton.Position = UDim2.new(0, 145, 0.1, 0)
+            oButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+            oButton.Text = "script1"
+            oButton.Font = Enum.Font.SciFi
+            oButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            oButton.TextStrokeTransparency = 0.1
+            oButton.BorderSizePixel = 0
+            oButton.TextScaled = true
+            oButton.Active = true
+            oButton.Parent = image
+
+            oButton.MouseButton1Click:Connect(function()
+                local success, err = pcall(function()
+                    loadstring(game:HttpGet('https://raw.githubusercontent.com/tbao143/thaibao/main/TbaohubPrisonLife'))()
+                end)
+                if success then
+                    print("success")
+                    oButton.Text = "success"
+                    task.wait(1.5)
+                    oButton.Text = "script1"
+                else
+                    print("error")
+                    oButton.Text = "error"
+                    task.wait(1.5)
+                    oButton.Text = "script1"
+                    warn("Ошибка загрузки script1: " .. tostring(err))
+                end
+            end)
+
+            aButton = Instance.new("TextButton")
+            aButton.Size = UDim2.new(0, 110, 0, 40)
+            aButton.Position = UDim2.new(0, 270, 0.1, 0)
+            aButton.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+            aButton.Text = "script2"
+            aButton.Font = Enum.Font.SciFi
+            aButton.TextColor3 = Color3.fromRGB(0, 255, 128)
+            aButton.TextStrokeTransparency = 0.1
+            aButton.BorderSizePixel = 0
+            aButton.TextScaled = true
+            aButton.Active = true
+            aButton.Parent = image
+
+            aButton.MouseButton1Click:Connect(function()
+                local success, err = pcall(function()
+                    loadstring(game:HttpGet('https://raw.githubusercontent.com/tbao143/thaibao/main/TbaohubPrisonLife'))()
+                end)
+                if success then
+                    print("success")
+                    aButton.Text = "success"
+                    task.wait(1.5)
+                    aButton.Text = "script2"
+                else
+                    print("error")
+                    aButton.Text = "error"
+                    task.wait(1.5)
+                    aButton.Text = "script2"
+                    warn("Ошибка загрузки script2: " .. tostring(err))
+                end
+            end)
+
+            eButton = Instance.new("TextButton")
+            eButton.Size = UDim2.new(0, 110, 0, 40)
+            eButton.Position = UDim2.new(0, 390, 0.1, 0)
+            eButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            eButton.Text = "script3"
+            eButton.Font = Enum.Font.SciFi
+            eButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            eButton.TextStrokeTransparency = 0.1
+            eButton.BorderSizePixel = 0
+            eButton.TextScaled = true
+            eButton.Active = true
+            eButton.Parent = image
+
+            eButton.MouseButton1Click:Connect(function()
+                local success, err = pcall(function()
+                    loadstring(game:HttpGet('https://raw.githubusercontent.com/tbao143/thaibao/main/TbaohubPrisonLife'))()
+                end)
+                if success then
+                    print("success")
+                    eButton.Text = "success"
+                    task.wait(1.5)
+                    eButton.Text = "script3"
+                else
+                    print("error")
+                    eButton.Text = "error"
+                    task.wait(1.5)
+                    eButton.Text = "script3"
+                    warn("Ошибка загрузки script3: " .. tostring(err))
+                end
+            end)
+
+            oButton.MouseEnter:Connect(function() showTooltip("") end)
+            oButton.MouseLeave:Connect(hideTooltip)
+            oButton.MouseMoved:Connect(moveTooltip)
+            aButton.MouseEnter:Connect(function() showTooltip("") end)
+            aButton.MouseLeave:Connect(hideTooltip)
+            aButton.MouseMoved:Connect(moveTooltip)
+            eButton.MouseEnter:Connect(function() showTooltip("") end)
+            eButton.MouseLeave:Connect(hideTooltip)
+            eButton.MouseMoved:Connect(moveTooltip)
+
+            print("sorry but Nhub is still under construction")
+        elseif placeId == 555555 then
+            print("Place 5 detected!")
+        else
+            print("PlaceId не найден в списке команд.")
+        end
+    end
+
+    searchButton.MouseButton1Click:Connect(function()
+        local placeId = game.PlaceId
+        runPlaceCommands(placeId)
+    end)
+
+  
+    local flying = false
+    local flySpeed = 50
+    local flyBodyVel
+    local flyConn
+
+    local function startFly()
+        if flying then return end
+        flying = true
+
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not root then
+            player.CharacterAdded:Wait()
+            root = player.Character:WaitForChild("HumanoidRootPart")
+        end
+
+        flyBodyVel = Instance.new("BodyVelocity")
+        flyBodyVel.Velocity = Vector3.zero
+        flyBodyVel.MaxForce = Vector3.new(1,1,1) * 1e5
+        flyBodyVel.Parent = root
+
+        flyConn = RunService.RenderStepped:Connect(function()
+            if flying then
+                local cam = workspace.CurrentCamera
+                local dir = Vector3.zero
+
+                if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end
+
+                if dir.Magnitude > 0 then
+                    flyBodyVel.Velocity = dir.Unit * flySpeed
+                else
+                    flyBodyVel.Velocity = Vector3.zero
+                end
+            end
+        end)
+    end
+
+    local function stopFly()
+        flying = false
+        if flyBodyVel then flyBodyVel:Destroy() flyBodyVel = nil end
+        if flyConn then flyConn:Disconnect() end
+    end
+
+    flyButton.MouseButton1Click:Connect(function()
+        if not flying then
+            startFly()
+            flyButton.Text = "Fly: ON"
+        else
+            stopFly()
+            flyButton.Text = "Fly: OFF"
+        end
+    end)
+
+    infButton.MouseButton1Click:Connect(function()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+        end)
+        if success then
+            infButton.Text = "Загружено!"
+            task.wait(1.5)
+            infButton.Text = "★ Inf Yield ★"
+        else
+            infButton.Text = "Ошибка"
+            task.wait(1.5)
+            infButton.Text = "★ Inf Yield ★"
+            warn("Ошибка загрузки InfiniteYield: " .. tostring(err))
+        end
+    end)
 end
 
-
 local function validateKey()
-	if textbox.Text == correctKey then
-		launchMainGui()
-	else
-		player:Kick("cmon get code form our site")
-	end
+    if textbox.Text == correctKey then
+        accessGui:Destroy()
+        print("nhub launching...")
+        task.wait(4)
+        print("success")
+        task.wait(0.7)
+        launchMainGui()
+    else
+        errorLabel.Text = "Неверный ключ!"
+        errorLabel.Visible = true
+        task.wait(1.5)
+        errorLabel.Visible = false
+
+        if syn and syn.open then
+            syn.open("https://n9tydteaminfo.tilda.ws/")
+        elseif KRNL_LOADED and krnl_open then
+            krnl_open("https://n9tydteaminfo.tilda.ws/")
+        elseif request and request.open then
+            request.open("https://n9tydteaminfo.tilda.ws/")
+        else
+    -- Просто покажи ссылку игроку
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Ошибка ключа",
+                Text = "Перейдите по ссылке: https://example.com",
+                Duration = 6
+             })
+         end
+        
+    end
 end
 
 button.MouseButton1Click:Connect(validateKey)
 textbox.FocusLost:Connect(function(enterPressed)
-	if enterPressed then validateKey() end
+    if enterPressed then validateKey() end
 end)
